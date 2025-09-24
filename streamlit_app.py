@@ -1,99 +1,27 @@
 # -*- coding: utf-8 -*-
 import streamlit as st
-from urllib.parse import quote
 from datetime import datetime, date, time, timedelta
 import uuid, re, io
+from urllib.parse import quote
 
-# =========================
-# Branding (set your real logo URL here)
-# =========================
-LOGO_URL = " "  # ✅ replace with real logo URL if you have it
-
-# =========================
-# Page config
-# =========================
-st.set_page_config(
-    page_title="Alef Centre — AI Assistant",
-    page_icon=(LOGO_URL if LOGO_URL else " "),
-    layout="wide",
-)
-
-# =========================
-# Language (AR default) + fallback
-# =========================
-if "lang" not in st.session_state:
-    st.session_state.lang = "ar"
-try:
-    lang = st.segmented_control("اللغة / Language", options=["ar","en"], default="ar", label_visibility="collapsed")
-except Exception:
-    lang = st.radio("Language", options=["ar","en"], horizontal=True, label_visibility="collapsed")
-st.session_state.lang = lang
-
-# =========================
-# CSS (RTL for AR, LTR for EN) + numeric alignment helpers
-# =========================
-COMMON_CSS = """
-<style>
-/* Chips buttons look */
-.chip-btn > button {
-  border-radius: 999px !important;
-  border: 1px solid #e2e8f0 !important;
-  background: #f8fafc !important;
-  font-weight: 600 !important;
-  font-size: 12px !important;
-  padding: 6px 12px !important;
-  margin: 0 8px 8px 0 !important;
-}
-.ltr-inline { direction:ltr; unicode-bidi:isolate; }  /* keeps numbers left-to-right inside Arabic lines */
-</style>
-"""
-st.markdown(COMMON_CSS, unsafe_allow_html=True)
-
-CSS_RTL = """
-<style>
-html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] { direction: rtl; }
-[data-testid="stMarkdownContainer"], .stAlert, .stExpander, .stButton, .stText, .stSubheader, .stHeader { text-align: right; }
-input, textarea, select { direction: rtl !important; text-align: right !important; }
-h1, h2, h3, h4, h5, p, ul, ol, li { text-align: right; margin: 0.25rem 0; }
-/* Expander fix */
-[data-testid="stExpander"] > details > summary { direction: rtl !important; display:flex; flex-direction:row-reverse; align-items:center; }
-[data-testid="stExpander"] > details > summary svg { margin-left:8px; }
-[data-testid="stExpander"] > details > summary > div { flex:1; text-align:right; }
-/* Arabic font */
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap');
-html, body, [data-testid="stAppViewContainer"] * { font-family: "Tajawal", sans-serif; }
-</style>
-"""
-
-CSS_LTR = """
-<style>
-html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] { direction: ltr; }
-[data-testid="stMarkdownContainer"], .stAlert, .stExpander, .stButton, .stText, .stSubheader, .stHeader { text-align: left; }
-input, textarea, select { direction: ltr !important; text-align: left !important; }
-h1, h2, h3, h4, h5, p, ul, ol, li { text-align: left; margin: 0.25rem 0; }
-/* Expander fix */
-[data-testid="stExpander"] > details > summary { direction: ltr !important; display:flex; flex-direction:row; align-items:center; }
-[data-testid="stExpander"] > details > summary svg { margin-right:8px; }
-[data-testid="stExpander"] > details > summary > div { flex:1; text-align:left; }
-/* Same font works for EN too */
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap');
-html, body, [data-testid="stAppViewContainer"] * { font-family: "Tajawal", sans-serif; }
-</style>
-"""
-st.markdown(CSS_RTL if lang == "ar" else CSS_LTR, unsafe_allow_html=True)
-
-# =========================
-# Business data
-# =========================
+# ---------------------------
+# Branding / Config
+# ---------------------------
 CLINIC_NAME = "Alef Centre"
+LOGO_URL = "https://alefcentre.com/favicon.ico"  # can replace with PNG/SVG later
+
+# Correct address + maps (as provided)
 ADDRESS_AR = "شارع الوصل، مبنى الفردوس 4، الطابق الاول، مكتب 133، دبي، الامارات العربية المتحدة"
-ADDRESS_EN = "Al wasl, Ferdous Building 4 1st Floor, Office 133 - Dubai - United Arab Emirates."
-MAPS_URL   = "https://www.google.ae/maps/place/Alef+Centre+%D9%85%D8%B1%D9%83%D8%B2+%D8%A3%D9%84%D9%81%E2%80%AD/@25.1790568,55.2321623,16z/data=!3m1!4b1!4m6!3m5!1s0x3e5f69dc9f93a4db:0xc26cd5a7395f530!8m2!3d25.179052!4d55.2347372!16s%2Fg%2F11fmsfdp21?entry=ttu&g_ep=EgoyMDI1MDkyMS4wIKXMDSoASAFQAw%3D%3D"
+ADDRESS_EN = "Al wasl, Ferdous Building 4 1st Floor, Office 133 - Dubai - Émirats arabes unis."
+MAPS_URL   = ("https://www.google.ae/maps/place/Alef+Centre+%D9%85%D8%B1%D9%83%D8%B2+%D8%A3%D9%84%D9%81%E2%80%AD/"
+              "@25.1790568,55.2321623,16z/data=!3m1!4b1!4m6!3m5!1s0x3e5f69dc9f93a4db:0xc26cd5a7395f530!8m2!3d25.179052!"
+              "4d55.2347372!16s%2Fg%2F11fmsfdp21?entry=ttu&g_ep=EgoyMDI1MDkyMS4wIKXMDSoASAFQAw%3D%3D")
+
 PHONES = ["+971 4 388 1169", "+971 56 778 3020"]
 EMAILS = ["info@alefcentre.com", "alefcentre@gmail.com"]
 
-# Opening hours (Sun–Thu)
-WORK_DAYS = [6,0,1,2,3]  # Sun=6
+# Opening hours (Sun–Thu), Fri & Sat closed
+WORK_DAYS = [6,0,1,2,3]  # Python: Mon=0 ... Sun=6  -> here Sun=6
 OPEN_T, CLOSE_T = time(10, 0), time(17, 30)
 
 SERVICES = [
@@ -104,12 +32,79 @@ SERVICES = [
     {"id":"speech",        "ar":"جلسة نطق وتخاطب",           "en":"Speech & language",       "mins":45, "price":300},
 ]
 
-# =========================
+# ---------------------------
+# Streamlit Page
+# ---------------------------
+st.set_page_config(
+    page_title=f"{CLINIC_NAME} — AI Assistant",
+    page_icon=LOGO_URL if LOGO_URL else "🧠",
+    layout="wide",
+)
+
+# Language state
+if "lang" not in st.session_state:
+    st.session_state.lang = "ar"
+
+# Lightweight language picker (segmented if available)
+try:
+    lang = st.segmented_control("اللغة / Language", options=["ar","en"], default=st.session_state.lang, label_visibility="collapsed")
+except Exception:
+    lang = st.radio("Language", options=["ar","en"], horizontal=True, label_visibility="collapsed")
+st.session_state.lang = lang
+
+# ---------------------------
+# CSS (RTL/LTR + chips + number alignment)
+# ---------------------------
+st.markdown("""
+<style>
+/* General Arabic/English handling */
+html, body, [data-testid="stAppViewContainer"] { font-family: "Tajawal", system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap');
+
+/* Chips as buttons */
+.chip-btn > button {
+  border-radius: 999px !important;
+  border: 1px solid #e2e8f0 !important;
+  background: #f8fafc !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  padding: 6px 12px !important;
+  margin: 0 8px 8px 0 !important;
+}
+.ltr-inline { direction:ltr; unicode-bidi:isolate; }
+
+</style>
+""", unsafe_allow_html=True)
+
+if lang == "ar":
+    st.markdown("""
+    <style>
+    html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] { direction: rtl; }
+    [data-testid="stMarkdownContainer"], .stAlert, .stExpander, .stButton, .stText, .stSubheader, .stHeader { text-align: right; }
+    input, textarea, select { direction: rtl !important; text-align: right !important; }
+    h1, h2, h3, h4, h5, p, ul, ol, li { text-align: right; }
+    [data-testid="stExpander"] > details > summary { direction: rtl !important; display:flex; flex-direction:row-reverse; align-items:center; }
+    [data-testid="stExpander"] > details > summary svg { margin-left:8px; }
+    </style>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown("""
+    <style>
+    html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] { direction: ltr; }
+    [data-testid="stMarkdownContainer"], .stAlert, .stExpander, .stButton, .stText, .stSubheader, .stHeader { text-align: left; }
+    input, textarea, select { direction: ltr !important; text-align: left !important; }
+    h1, h2, h3, h4, h5, p, ul, ol, li { text-align: left; }
+    [data-testid="stExpander"] > details > summary { direction: ltr !important; display:flex; flex-direction:row; align-items:center; }
+    [data-testid="stExpander"] > details > summary svg { margin-right:8px; }
+    </style>
+    """, unsafe_allow_html=True)
+
+# ---------------------------
 # Translations
-# =========================
+# ---------------------------
 T = {
   "ar": {
-    "title": f" {CLINIC_NAME} - مساعد ذكي (عرض تجريبي)",
+    "title": f"🧠 {CLINIC_NAME} - مساعد ذكي (عرض تجريبي)",
     "subtitle": "هذه نسخة للتجربة قبل التركيب على واتساب/الموقع.",
     "tabs": ["الدردشة","الحجز","المعلومات"],
     "chips": ["اين موقعكم","اريد رقم التواصل","ما هي ساعات العمل","كم سعر التشخيص الكامل","اريد الحجز اليوم"],
@@ -125,7 +120,7 @@ T = {
     "whatsapp_loc": "ارسال اللوكيشن عبر واتساب",
     "call_now": "اتصال الآن",
     "request_call": "اطلب مكالمة",
-    "callback_thanks": "تم استلام طلبك. سيتواصل معك الموظف قريبًا.",
+    "callback_thanks": "تم استلام طلبك. سيتواصل معك الموظف قريباً.",
     "booking_title": "حجز موعد",
     "svc": "الخدمة",
     "date": "اليوم",
@@ -157,7 +152,7 @@ T = {
     "human_handoff": "هل تود تحويلك لموظف؟"
   },
   "en": {
-    "title": f" {CLINIC_NAME} — Smart Assistant (Demo)",
+    "title": f"🧠 {CLINIC_NAME} — Smart Assistant (Demo)",
     "subtitle": "Arabic-first demo. Can be embedded into WhatsApp/website.",
     "tabs": ["Chat","Booking","Info"],
     "chips": ["Where is your location?","I need a contact number","What are opening hours?","How much is full assessment?","Book today"],
@@ -206,9 +201,9 @@ T = {
   }
 }
 
-# =========================
+# ---------------------------
 # Helpers
-# =========================
+# ---------------------------
 def is_workday(d: date) -> bool:
     return d.weekday() in WORK_DAYS
 
@@ -226,10 +221,7 @@ def gen_slots(d: date, duration_minutes: int):
     now = datetime.now()
     start_dt = datetime.combine(d, OPEN_T)
     if d == date.today() and now.time() > OPEN_T:
-        if now.minute % 15:  # round up to next quarter-hour
-            start_dt = round_up_to_quarter(now)
-        else:
-            start_dt = now
+        start_dt = round_up_to_quarter(now)
     end_dt = datetime.combine(d, CLOSE_T)
     step = timedelta(minutes=max(15, duration_minutes))
     slots, cur = [], start_dt
@@ -264,22 +256,26 @@ def tel_href(phone: str) -> str:
 
 def quick_answer(user_text: str, lang="ar") -> str:
     t = (user_text or "").strip()
-    # Location
+
+    # Location / address (avoid mis-matching "كم" inside "موقعكم")
     if any(k in t for k in (["موقع","عنوان","وين","لوكيشن"] if lang=="ar" else ["where","address","location"])):
         return (f"العنوان: {ADDRESS_AR}\n({ADDRESS_EN})\nرابط خرائط جوجل: {MAPS_URL}"
                 if lang=="ar" else
                 f"Address: {ADDRESS_EN}\n(AR: {ADDRESS_AR})\nGoogle Maps: {MAPS_URL}")
+
     # Contact
     if any(k in t for k in (["تواصل","رقم","واتساب","هاتف"] if lang=="ar" else ["phone","number","contact","whatsapp"])):
         return (f"ارقام الهاتف: {', '.join(PHONES)}\nالبريد الالكتروني: {', '.join(EMAILS)}"
                 if lang=="ar" else
                 f"Phones: {', '.join(PHONES)}\nEmails: {', '.join(EMAILS)}")
+
     # Hours
     if any(k in t for k in (["ساعات","العمل","دوام"] if lang=="ar" else ["hours","opening","open"])):
         return (f"ساعات العمل: الاحد - الخميس {OPEN_T.strftime('%H:%M')} - {CLOSE_T.strftime('%H:%M')} (الجمعة والسبت مغلق)"
                 if lang=='ar' else
                 f"Hours: Sun–Thu {OPEN_T.strftime('%H:%M')} - {CLOSE_T.strftime('%H:%M')} (Fri & Sat closed)")
-    # Pricing (avoid matching 'كم' inside 'موقعكم')
+
+    # Pricing (don't trigger on 'كم' inside 'موقعكم')
     words = t.replace("؟"," ").replace("?"," ").split()
     if ("سعر" in t or "الاسعار" in t or "كم سعر" in t or "بكم" in t or ("كم" in words)) or \
        (lang=="en" and ("price" in t or "cost" in t)):
@@ -289,64 +285,64 @@ def quick_answer(user_text: str, lang="ar") -> str:
         else:
             lines = [f"- {s['en']}: ~{s['price']} AED" for s in SERVICES]
             return "Approximate pricing:\n" + "\n".join(lines)
+
     # Booking mention
     if any(k in t for k in (["حجز","موعد","ارلن"] if lang=="ar" else ["book","appointment","irlen"])):
         return T[lang]["human_handoff"] + " → " + (T[lang]["booking_title"])
+
     # Greeting
     if any(k in t for k in (["مرحبا","السلام","اهلا"] if lang=="ar" else ["hi","hello","hey"])):
         return T[lang]["what_do"] + "\n- " + "\n- ".join(T[lang]["what_do_bullets"])
+
     # Fallback
     return ( "مفهوم. اسأل عن: الموقع، رقم التواصل، ساعات العمل، الاسعار، او ابدأ بالحجز."
              if lang=="ar" else
              "Got it. Ask about: address, contact, hours, pricing — or start a booking." )
 
-# =========================
-# Header (logo + title)
-# =========================
+# ---------------------------
+# Header
+# ---------------------------
 col_logo, col_title = st.columns([1, 6])
 with col_logo:
-    if LOGO_URL:
-        try:
-            st.image(LOGO_URL, width=56)
-        except Exception:
-            pass
+    try:
+        st.image(LOGO_URL, width=56)
+    except Exception:
+        st.write("🧠")
 with col_title:
     st.title(T[lang]["title"])
     st.caption(T[lang]["subtitle"])
 
-# =========================
+# ---------------------------
 # Tabs
-# =========================
+# ---------------------------
 tab_chat, tab_book, tab_info = st.tabs(T[lang]["tabs"])
 
-# -------------------------
-# Quick replies renderer (buttons, not links)
-# -------------------------
+# Quick replies (fixed to fill the textbox)
 def render_quick_replies(chips):
-    cols = st.columns(min(4, len(chips)))  # responsive rows
+    cols = st.columns(min(4, len(chips)))
     for i, c in enumerate(chips):
         with cols[i % len(cols)]:
-            # wrapper class to style buttons as chips
             st.markdown('<div class="chip-btn">', unsafe_allow_html=True)
-            if st.button(c, key=f"chip_{lang}_{i}"):
-                st.session_state["chat_in"] = c
+            if st.button(c, key=f"chip_{st.session_state.lang}_{i}"):
+                st.session_state["chat_in_box"] = c
                 st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-# -------------------------
+# ---------------------------
 # TAB: Chat
-# -------------------------
+# ---------------------------
 with tab_chat:
     st.markdown(f"**{T[lang]['faq']}**")
     render_quick_replies(T[lang]["chips"])
 
-    user = st.text_input(T[lang]["ask"], value=st.session_state.get("chat_in",""), key="chat_in_box")
+    user = st.text_input(T[lang]["ask"], key="chat_in_box")
     c1, c2 = st.columns(2)
     with c1:
         if st.button(T[lang]["send"], use_container_width=True):
-            if user:
-                st.write(f"**انت:** {user}" if lang=="ar" else f"**You:** {user}")
-                st.success(quick_answer(user, lang=lang))
+            msg = st.session_state.get("chat_in_box", "")
+            if msg:
+                st.write(f"**انت:** {msg}" if lang=="ar" else f"**You:** {msg}")
+                st.success(quick_answer(msg, lang=lang))
     with c2:
         if st.button(T[lang]["request_call"], use_container_width=True):
             with st.form("callback"):
@@ -379,34 +375,35 @@ with tab_chat:
         st.write(f"**{T['en']['phones']}**: {', '.join(PHONES)}")
         st.write(f"**{T['en']['emails']}**: {', '.join(EMAILS)}")
 
-    # copy / WhatsApp / call
     cA, cB, cC = st.columns(3)
     with cA:
         if st.button(T[lang]["copy"], use_container_width=True):
             st.markdown(f"""
             <script>
-            navigator.clipboard.writeText("{(ADDRESS_AR if lang=='ar' else ADDRESS_EN).replace('"','\\"')}\\n{MAPS_URL}");
+            navigator.clipboard.writeText("{(ADDRESS_AR if lang=='ar' else ADDRESS_EN).replace('"','\\\"')}\\n{MAPS_URL}");
             </script>
             """, unsafe_allow_html=True)
-            st.toast("تم النسخ" if lang=="ar" else "Copied")
+            st.info("تم النسخ" if lang=="ar" else "Copied")
     with cB:
         wa_text = f"{'لوكيشن Alef Centre' if lang=='ar' else 'Alef Centre location'}:\\n" \
                   f"{ADDRESS_AR if lang=='ar' else ADDRESS_EN}\\n{MAPS_URL}"
+        url = "https://wa.me/?text=" + quote(wa_text)
         try:
-            st.link_button(T[lang]["whatsapp_loc"], "https://wa.me/?text=" + quote(wa_text), use_container_width=True)
+            st.link_button(T[lang]["whatsapp_loc"], url, use_container_width=True)
         except Exception:
-            st.markdown(f"[{T[lang]['whatsapp_loc']}]({'https://wa.me/?text=' + quote(wa_text)})")
+            st.markdown(f"[{T[lang]['whatsapp_loc']}]({url})")
     with cC:
+        tel = tel_href(PHONES[0])
         try:
-            st.link_button(T[lang]["call_now"], "tel:+97143881169", use_container_width=True)
+            st.link_button(T[lang]["call_now"], tel, use_container_width=True)
         except Exception:
-            st.markdown(f"[{T[lang]['call_now']}](tel:+97143881169)")
+            st.markdown(f"[{T[lang]['call_now']}]({tel})")
 
     st.caption(T[lang]["privacy"])
 
-# -------------------------
+# ---------------------------
 # TAB: Booking
-# -------------------------
+# ---------------------------
 def service_names():
     return [s["ar"] if lang=="ar" else s["en"] for s in SERVICES]
 
@@ -467,15 +464,16 @@ with tab_book:
                        (f"Your appointment at {CLINIC_NAME} is booked.\n"
                         f"Service: {svc_choice}\nDate: {picked_day} - Time: {slot_choice}\n"
                         f"Ref: {ref}\nAddress: {ADDRESS_EN}\n{MAPS_URL}")
+        share_url = "https://wa.me/?text=" + quote(confirm_text)
         try:
             st.link_button("مشاركة التاكيد في واتساب" if lang=="ar" else "Share confirmation on WhatsApp",
-                           "https://wa.me/?text=" + quote(confirm_text), use_container_width=True)
+                           share_url, use_container_width=True)
         except Exception:
-            st.markdown(f"[{'مشاركة التاكيد في واتساب' if lang=='ar' else 'Share confirmation on WhatsApp'}]({'https://wa.me/?text=' + quote(confirm_text)})")
+            st.markdown(f"[{'مشاركة التاكيد في واتساب' if lang=='ar' else 'Share confirmation on WhatsApp'}]({share_url})")
 
-# -------------------------
+# ---------------------------
 # TAB: Info
-# -------------------------
+# ---------------------------
 with tab_info:
     st.subheader(T[lang]["quick_info"])
     if lang == "ar":
