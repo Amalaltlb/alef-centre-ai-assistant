@@ -7,7 +7,7 @@ import uuid, re, io
 # =========================
 # Branding (set your real logo URL here)
 # =========================
-LOGO_URL = "https://alefcentre.com/favicon.ico"  # ✅ replace with real logo URL if you have it
+LOGO_URL = "https://share.google/images/T1R4KqhrYMF30ZG6J"  # ✅ replace with real logo URL if you have it
 
 # =========================
 # Page config
