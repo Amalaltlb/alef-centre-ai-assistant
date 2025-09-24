@@ -157,7 +157,7 @@ T = {
     "human_handoff": "هل تود تحويلك لموظف؟"
   },
   "en": {
-    "title": f"🧠 {CLINIC_NAME} — Smart Assistant (Demo)",
+    "title": f" {CLINIC_NAME} — Smart Assistant (Demo)",
     "subtitle": "Arabic-first demo. Can be embedded into WhatsApp/website.",
     "tabs": ["Chat","Booking","Info"],
     "chips": ["Where is your location?","I need a contact number","What are opening hours?","How much is full assessment?","Book today"],
