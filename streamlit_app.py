@@ -14,7 +14,7 @@ LOGO_URL = "https://share.google/images/T1R4KqhrYMF30ZG6J"  # ✅ replace with r
 # =========================
 st.set_page_config(
     page_title="Alef Centre — AI Assistant",
-    page_icon=(LOGO_URL if LOGO_URL else "🧠"),
+    page_icon=(LOGO_URL if LOGO_URL else ""),
     layout="wide",
 )
 
