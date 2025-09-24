@@ -3,7 +3,33 @@ import streamlit as st
 import random
 from urllib.parse import quote
 
-# اعدادات عامة
+# 1) اعداد صفحة ستريمليت
+st.set_page_config(page_title="Alef Centre - مساعد ذكي", page_icon="🧠", layout="wide")
+
+# 2) تفعيل RTL + خط عربي
+st.markdown("""
+<style>
+/* اجعل الاتجاه يمين -> يسار */
+html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
+  direction: rtl;
+}
+/* محاذاة النصوص */
+[data-testid="stMarkdownContainer"], .stAlert, .stExpander, .stButton, .stText, .stSubheader, .stHeader {
+  text-align: right;
+}
+/* الحقول */
+input, textarea { direction: rtl !important; text-align: right !important; }
+/* العناوين والقوائم */
+h1, h2, h3, h4, h5, p, ul, ol, li { text-align: right; }
+/* عناصر نريدها LTR عند الحاجة (روابط/اكواد) */
+.ltr, a code, code { direction: ltr !important; text-align: left !important; unicode-bidi: embed; }
+/* خط عربي */
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap');
+html, body, [data-testid="stAppViewContainer"] * { font-family: "Tajawal", sans-serif; }
+</style>
+""", unsafe_allow_html=True)
+
+# 3) بيانات المساعد
 CLINIC_NAME = "Alef Centre"
 
 SERVICES = {
@@ -16,7 +42,7 @@ SERVICES = {
 
 ADDRESS_AR = "مبنى الفردوس 4، شارع الوصل، الطابق الاول، مكتب 133، الصفاء 1، جميرا، دبي"
 ADDRESS_EN = "Al Ferdous 4, Al Wasl Road, First Floor, Office 133, Al Safa 1, Jumeirah, Dubai, UAE"
-MAPS_URL = "https://maps.google.com/?q=Al+Ferdous+4,+Al+Wasl+Road,+Office+133,+Dubai"
+MAPS_URL   = "https://maps.google.com/?q=Al+Ferdous+4,+Al+Wasl+Road,+Office+133,+Dubai"
 
 HOURS = {
     "الاحد - الخميس": "10:00 - 17:30",
@@ -27,48 +53,7 @@ HOURS = {
 PHONES = ["+971 4 388 1169", "+971 56 778 3020"]
 EMAILS = ["info@alefcentre.com", "alefcentre@gmail.com"]
 
-st.set_page_config(page_title=f"{CLINIC_NAME} - مساعد ذكي", page_icon="🧠")
-
-# ====== RTL + Arabic font ======
-st.markdown("""
-<style>
-/* خلي التطبيق كله RTL */
-html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
-  direction: rtl;
-}
-
-/* محاذاة النصوص للعربي */
-[data-testid="stMarkdownContainer"], .stAlert, .stExpander, .stButton, .stText, .stSubheader, .stHeader {
-  text-align: right;
-}
-
-/* حقول الإدخال */
-input, textarea {
-  direction: rtl !important;
-  text-align: right !important;
-}
-
-/* العناوين والقوائم */
-h1, h2, h3, h4, h5, p, ul, ol, li {
-  text-align: right;
-}
-
-/* اجبر الروابط/الأكواد على LTR اذا احتجت (مثلا روابط طويلة) */
-.ltr, a code, code {
-  direction: ltr !important;
-  text-align: left !important;
-  unicode-bidi: embed;
-}
-
-/* خط عربي جميل (اختياري) */
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap');
-html, body, [data-testid="stAppViewContainer"] * {
-  font-family: "Tajawal", sans-serif;
-}
-</style>
-""", unsafe_allow_html=True)
-# ====== /RTL ======
-
+# 4) واجهة التطبيق
 st.title(f"🧠 {CLINIC_NAME} - مساعد ذكي (عرض تجريبي)")
 st.caption("واجهة عربية فقط. هذا ديمو للتجربة وليس نظاما نهائيا.")
 
@@ -80,7 +65,7 @@ st.markdown("""
 - ارسال تاكيد وهمي للحجز في هذا الديمو
 """)
 
-with st.expander("طريقة الاستخدام"):
+with st.expander("طريقة الاستخدام / امثلة"):
     st.write("""
 اكتب رسائل مثل:
 - اريد حجز جلسة فحص ارلن يوم الخميس الساعة 4
@@ -107,35 +92,35 @@ def has_price_intent(text):
 def handle_message(msg: str) -> str:
     t = (msg or "").strip()
 
-    # 1) الموقع اولا (لمنع التقاط "كم" داخل "موقعكم")
+    # الموقع اولا (لمنع التقاط "كم" داخل "موقعكم")
     if has_any(t, ["موقع", "عنوان", "وين", "لوكيشن"]):
         return f"العنوان: {ADDRESS_AR}\n({ADDRESS_EN})\nرابط خرائط جوجل: {MAPS_URL}\nيمكنك استخدام الازرار في الاسفل لفتح الخريطة او ارسال اللوكيشن عبر واتساب."
 
-    # 2) الحجز
+    # الحجز
     if has_any(t, ["حجز", "موعد", "ارلن"]):
         slot = f"{random.choice(['10:00','12:30','15:00','16:30'])} يوم {random.choice(['الاربعاء','الخميس','الاحد'])}"
-        ref = f"REF-{random.randint(1000,9999)}"
-        svc = random.choice(list(SERVICES.keys()))
+        ref  = f"REF-{random.randint(1000,9999)}"
+        svc  = random.choice(list(SERVICES.keys()))
         return f"تم الحجز بنجاح. الخدمة: {svc}. الموعد: {slot}. رقم المرجع: {ref}. هذا حجز تجريبي."
 
-    # 3) ساعات العمل
+    # ساعات العمل
     if has_any(t, ["ساعات", "العمل", "دوام"]):
         return f"ساعات العمل:\nالاحد - الخميس: {HOURS['الاحد - الخميس']}\nالجمعة: {HOURS['الجمعة']}\nالسبت: {HOURS['السبت']}"
 
-    # 4) التواصل
+    # التواصل
     if has_any(t, ["تواصل", "رقم", "واتساب", "بريد"]):
         return f"ارقام الهاتف: {', '.join(PHONES)}\nالبريد الالكتروني: {', '.join(EMAILS)}"
 
-    # 5) التامين
+    # التامين
     if has_any(t, ["تامين", "تأمين"]):
         return "المركز تعليمي وتشخيصي لاضطراب ارلن ودعم التعلم، وليس عيادة طبية تقليدية. عادة لا يتم الفوترة عبر التامين الطبي. للاستفسار النهائي تواصل مع الاستقبال."
 
-    # 6) الاسعار
+    # الاسعار
     if has_price_intent(t):
         lines = [f"- {k}: {v} درهم تقريبا" for k,v in SERVICES.items()]
         return "الاسعار التقريبية:\n" + "\n".join(lines)
 
-    # 7) ترحيب افتراضي
+    # ترحيب افتراضي
     if has_any(t, ["مرحبا", "السلام", "اهلا"]):
         return "اهلا بك. اسأل عن الحجز او الاسعار او ساعات العمل او الموقع او التواصل."
     return "مفهوم. يمكنك ان تقول: حجز، الاسعار، ساعات العمل، الموقع، التواصل."
