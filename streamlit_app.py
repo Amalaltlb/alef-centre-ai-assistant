@@ -6,7 +6,7 @@ from urllib.parse import quote
 # -------------------------
 # 1) Page config
 # -------------------------
-st.set_page_config(page_title="Alef Centre - مساعد ذكي", page_icon="🧠", layout="wide")
+st.set_page_config(page_title="Alef Centre - مساعد ذكي", page_icon="🧠")
 
 # -------------------------
 # 2) RTL + Arabic font + fix expander overlap
