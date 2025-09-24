@@ -50,7 +50,7 @@ html, body, [data-testid="stAppViewContainer"] * { font-family: "Tajawal", sans-
 CLINIC_NAME = "Alef Centre"
 
 ADDRESS_AR = "شارع الوصل، مبنى الفردوس 4، الطابق الاول، مكتب 133، دبي، الامارات العربية المتحدة"
-ADDRESS_EN = "Al wasl, Ferdous Building 4 1st Floor, Office 133 - Dubai - Émirats arabes unis."
+ADDRESS_EN = "Al wasl, Ferdous Building 4 1st Floor, Office 133 - Dubai - United Arab Emirates."
 MAPS_QUERY = ADDRESS_EN
 MAPS_URL   = "https://maps.google.com/?q=" + quote_plus(MAPS_QUERY)
 
