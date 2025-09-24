@@ -28,7 +28,7 @@ PHONES = ["+971 4 388 1169", "+971 56 778 3020"]
 EMAILS = ["info@alefcentre.com", "alefcentre@gmail.com"]
 
 st.set_page_config(page_title=f"{CLINIC_NAME} - مساعد ذكي", page_icon="🧠")
-st.set_page_config(page_title="...", page_icon="🧠", layout="meduim")
+st.set_page_config(page_title="...", page_icon="🧠", layout="medium")
 
 
 # ====== RTL + Arabic font ======
