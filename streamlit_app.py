@@ -4,7 +4,45 @@ import random
 from urllib.parse import quote
 
 # 1) اعداد صفحة ستريمليت
-st.set_page_config(page_title="Alef Centre - مساعد ذكي", page_icon="🧠", layout="wide")
+#st.set_page_config(page_title="Alef Centre - مساعد ذكي", page_icon="🧠", layout="wide")
+
+st.markdown("""
+<style>
+/* RTL عام */
+html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] { direction: rtl; }
+[data-testid="stMarkdownContainer"], .stAlert, .stExpander, .stButton, .stText, .stSubheader, .stHeader { text-align: right; }
+input, textarea { direction: rtl !important; text-align: right !important; }
+h1, h2, h3, h4, h5, p, ul, ol, li { text-align: right; }
+
+/* ✅ اصلاح تراكب عنوان الـ Expander مع الأيقونة */
+[data-testid="stExpander"] > details > summary {
+  direction: rtl !important;
+  display: flex;
+  flex-direction: row-reverse;   /* يخلي السهم يسار والعنوان يمين */
+  align-items: center;
+}
+[data-testid="stExpander"] > details > summary svg {
+  margin-left: 8px; margin-right: 0;
+}
+[data-testid="stExpander"] > details > summary > div {
+  flex: 1; text-align: right;
+}
+
+/* تسليك عناوين الحقول */
+[data-testid="stTextInput"] label,
+[data-testid="stTextArea"] label {
+  width: 100%; text-align: right;
+}
+
+/* شيء نبيه LTR (روابط/اكواد) */
+.ltr, a code, code { direction: ltr !important; text-align: left !important; unicode-bidi: embed; }
+
+/* خط عربي مريح */
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap');
+html, body, [data-testid="stAppViewContainer"] * { font-family: "Tajawal", sans-serif; }
+</style>
+""", unsafe_allow_html=True)
+
 
 # 2) تفعيل RTL + خط عربي
 st.markdown("""
