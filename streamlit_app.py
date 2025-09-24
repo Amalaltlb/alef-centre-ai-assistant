@@ -4,7 +4,7 @@ import random
 from urllib.parse import quote
 
 # 1) اعداد صفحة ستريمليت
-#st.set_page_config(page_title="Alef Centre - مساعد ذكي", page_icon="🧠", layout="wide")
+st.set_page_config(page_title="Alef Centre - مساعد ذكي", page_icon="🧠", layout="wide")
 
 # 2) تفعيل RTL + خط عربي
 st.markdown("""
