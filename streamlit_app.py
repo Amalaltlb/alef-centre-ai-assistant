@@ -4,87 +4,81 @@ from urllib.parse import quote, quote_plus
 from datetime import datetime, date, time, timedelta
 import uuid, re, io
 
-# -------------------------
-# Page config
-# -------------------------
+# =========================
+# Page & Branding (optional logo)
+# =========================
 st.set_page_config(page_title="Alef Centre — AI Assistant", page_icon="🧠", layout="wide")
+LOGO_URL = ""  # put a logo URL if you have one (PNG/SVG/JPG). Leave empty to hide.
 
-# -------------------------
-# Language (AR default)
-# -------------------------
+# =========================
+# Language (AR default) + fallbacks
+# =========================
 if "lang" not in st.session_state:
     st.session_state.lang = "ar"
 
-# Segmented control (fallback to radio if not available)
 try:
     lang = st.segmented_control("اللغة / Language", options=["ar","en"], default="ar", label_visibility="collapsed")
 except Exception:
-    lang = st.radio("Language", options=["ar","en"], horizontal=True, label_visibility="collapsed")
-
+    lang = st.radio("Language", options=["ar","en"], horizontal=True)
 st.session_state.lang = lang
 
-# -------------------------
-# CSS per-language
-# -------------------------
+# =========================
+# CSS per-language (RTL for AR, LTR for EN)
+# =========================
 CSS_RTL = """
 <style>
 html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] { direction: rtl; }
 [data-testid="stMarkdownContainer"], .stAlert, .stExpander, .stButton, .stText, .stSubheader, .stHeader { text-align: right; }
 input, textarea, select { direction: rtl !important; text-align: right !important; }
 h1, h2, h3, h4, h5, p, ul, ol, li { text-align: right; margin: 0.25rem 0; }
-/* Expander icon on the left, title on the right */
+/* Expander icon/title fix */
 [data-testid="stExpander"] > details > summary {
   direction: rtl !important; display: flex; flex-direction: row-reverse; align-items: center;
 }
 [data-testid="stExpander"] > details > summary svg { margin-left: 8px; }
 [data-testid="stExpander"] > details > summary > div { flex: 1; text-align: right; }
-/* LTR blocks (links/code) when needed */
+/* LTR blocks when needed */
 .ltr, a code, code { direction: ltr !important; text-align: left !important; unicode-bidi: embed; }
 /* Arabic font */
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap');
 html, body, [data-testid="stAppViewContainer"] * { font-family: "Tajawal", sans-serif; }
 </style>
 """
-
 CSS_LTR = """
 <style>
-/* Default LTR */
 html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] { direction: ltr; }
 [data-testid="stMarkdownContainer"], .stAlert, .stExpander, .stButton, .stText, .stSubheader, .stHeader { text-align: left; }
 input, textarea, select { direction: ltr !important; text-align: left !important; }
 h1, h2, h3, h4, h5, p, ul, ol, li { text-align: left; margin: 0.25rem 0; }
-/* Expander: icon on the left of title (standard) */
 [data-testid="stExpander"] > details > summary {
   direction: ltr !important; display: flex; flex-direction: row; align-items: center;
 }
 [data-testid="stExpander"] > details > summary svg { margin-right: 8px; }
 [data-testid="stExpander"] > details > summary > div { flex: 1; text-align: left; }
-/* Keep code/links LTR (no change) */
 .ltr, a code, code { direction: ltr !important; text-align: left !important; unicode-bidi: embed; }
-/* Same font (works great for EN too) */
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap');
 html, body, [data-testid="stAppViewContainer"] * { font-family: "Tajawal", sans-serif; }
 </style>
 """
-
 st.markdown(CSS_RTL if lang == "ar" else CSS_LTR, unsafe_allow_html=True)
 
-# -------------------------
+# =========================
 # Business data
-# -------------------------
+# =========================
 CLINIC_NAME = "Alef Centre"
 
 ADDRESS_AR = "شارع الوصل، مبنى الفردوس 4، الطابق الاول، مكتب 133، دبي، الامارات العربية المتحدة"
 ADDRESS_EN = "Al wasl, Ferdous Building 4 1st Floor, Office 133 - Dubai - Émirats arabes unis."
 
-# ✅ Use your exact Google Maps Place URL (one line!)
+# ✅ exact Google Maps place URL
 MAPS_URL = "https://www.google.ae/maps/place/Alef+Centre+%D9%85%D8%B1%D9%83%D8%B2+%D8%A3%D9%84%D9%81%E2%80%AD/@25.1790568,55.2321623,16z/data=!3m1!4b1!4m6!3m5!1s0x3e5f69dc9f93a4db:0xc26cd5a7395f530!8m2!3d25.179052!4d55.2347372!16s%2Fg%2F11fmsfdp21?entry=ttu&g_ep=EgoyMDI1MDkyMS4wIKXMDSoASAFQAw%3D%3D"
 
 PHONES = ["+971 4 388 1169", "+971 56 778 3020"]
 EMAILS = ["info@alefcentre.com", "alefcentre@gmail.com"]
 
-# Opening hours
-WORK_DAYS = [6,0,1,2,3]  # Sun–Thu open (Sun=6), Fri/Sat closed
+# Opening hours: Sun–Thu open (Fri/Sat closed)
+# Python weekday(): Mon=0 .. Sun=6 → open on [Sun(6), Mon(0), Tue(1), Wed(2), Thu(3)]
+WORK_DAYS = [6, 0, 1, 2, 3]
 OPEN_T, CLOSE_T = time(10, 0), time(17, 30)
 
 SERVICES = [
@@ -95,9 +89,9 @@ SERVICES = [
     {"id":"speech",        "ar":"جلسة نطق وتخاطب",           "en":"Speech & language",       "mins":45, "price":300},
 ]
 
-# -------------------------
+# =========================
 # Translations
-# -------------------------
+# =========================
 T = {
   "ar": {
     "title": f"🧠 {CLINIC_NAME} - مساعد ذكي (عرض تجريبي)",
@@ -197,9 +191,9 @@ T = {
   }
 }
 
-# -------------------------
-# Helpers
-# -------------------------
+# =========================
+# Helpers (pro-grade)
+# =========================
 def is_workday(d: date) -> bool:
     return d.weekday() in WORK_DAYS
 
@@ -208,9 +202,17 @@ def valid_phone(p: str) -> bool:
     p = p.strip().replace(" ", "")
     return bool(re.match(r"^(\+971|0)\d{8,9}$", p))
 
+def round_up_to_quarter(dt: datetime) -> datetime:
+    minutes = (dt.minute + 14) // 15 * 15
+    return dt.replace(minute=0, second=0, microsecond=0) + timedelta(minutes=minutes)
+
 def gen_slots(d: date, duration_minutes: int):
+    """Generate available slots within opening hours; skip past times for 'today'."""
     if not is_workday(d): return []
+    now = datetime.now()
     start_dt = datetime.combine(d, OPEN_T)
+    if d == date.today() and now.time() > OPEN_T:
+        start_dt = round_up_to_quarter(now + timedelta(minutes=15))
     end_dt = datetime.combine(d, CLOSE_T)
     step = timedelta(minutes=max(15, duration_minutes))
     slots, cur = [], start_dt
@@ -238,6 +240,18 @@ END:VEVENT
 END:VCALENDAR
 """
     return io.BytesIO(ics.encode("utf-8"))
+
+def tel_href(phone: str) -> str:
+    # keep plus sign and digits only
+    digits = re.sub(r"[^+\d]", "", phone or "")
+    return f"tel:{digits or '+97143881169'}"
+
+def link_button_safe(label: str, url: str, *, full=True):
+    # Streamlit < 1.33 may not have st.link_button → fallback to markdown link
+    try:
+        st.link_button(label, url, use_container_width=full)
+    except Exception:
+        st.markdown(f"[{label}]({url})")
 
 def quick_answer(user_text: str, lang="ar") -> str:
     t = (user_text or "").strip()
@@ -278,11 +292,26 @@ def quick_answer(user_text: str, lang="ar") -> str:
              if lang=="ar" else
              "Got it. Ask about: address, contact, hours, pricing — or start a booking." )
 
-# -------------------------
-# Header + Tabs
-# -------------------------
-st.title(T[lang]["title"])
-st.caption(T[lang]["subtitle"])
+# =========================
+# Header (logo + title)
+# =========================
+cols = st.columns([1,5]) if LOGO_URL else [None]
+if LOGO_URL:
+    with cols[0]:
+        try:
+            st.image(LOGO_URL, width=64)
+        except Exception:
+            pass
+    with cols[1]:
+        st.title(T[lang]["title"])
+        st.caption(T[lang]["subtitle"])
+else:
+    st.title(T[lang]["title"])
+    st.caption(T[lang]["subtitle"])
+
+# =========================
+# Tabs
+# =========================
 tab_chat, tab_book, tab_info = st.tabs(T[lang]["tabs"])
 
 # -------------------------
@@ -326,7 +355,7 @@ with tab_chat:
              (f"الاحد - الخميس {OPEN_T.strftime('%H:%M')} - {CLOSE_T.strftime('%H:%M')} (الجمعة والسبت مغلق)"
               if lang=='ar' else
               f"Sun–Thu {OPEN_T.strftime('%H:%M')} - {CLOSE_T.strftime('%H:%M')} (Fri & Sat closed)"))
-    st.write(f"**{T[lang]['address']}**: {ADDRESS_AR if lang=='ar' else ADDRESS_EN}")
+    st.write(f"**{T[lang]['address']}**: {ADDRESS_AR if lang=='ar' else {True: ADDRESS_EN}[True]}")
     st.markdown(f"[{T[lang]['maps']}]({MAPS_URL})")
     st.write(f"**{T[lang]['phones']}**: {', '.join(PHONES)}")
     st.write(f"**{T[lang]['emails']}**: {', '.join(EMAILS)}")
@@ -343,28 +372,32 @@ with tab_chat:
     with cB:
         wa_text = f"{'لوكيشن Alef Centre' if lang=='ar' else 'Alef Centre location'}:\\n" \
                   f"{ADDRESS_AR if lang=='ar' else ADDRESS_EN}\\n{MAPS_URL}"
-        st.link_button(T[lang]["whatsapp_loc"], "https://wa.me/?text=" + quote(wa_text), use_container_width=True)
+        link_button_safe(T[lang]["whatsapp_loc"], "https://wa.me/?text=" + quote(wa_text))
     with cC:
-        st.link_button(T[lang]["call_now"], "tel:+97143881169", use_container_width=True)
+        link_button_safe(T[lang]["call_now"], tel_href(PHONES[0]))
 
     st.caption(T[lang]["privacy"])
 
 # -------------------------
 # TAB: Booking
 # -------------------------
-def gen_services_names():
+def service_names():
     return [s["ar"] if lang=="ar" else s["en"] for s in SERVICES]
 
 with tab_book:
     st.subheader(T[lang]["booking_title"])
 
-    svc_choice = st.selectbox(T[lang]["svc"], options=["—"] + gen_services_names(), index=0)
+    svc_choice = st.selectbox(T[lang]["svc"], options=["—"] + service_names(), index=0)
     chosen = next((s for s in SERVICES if s["ar"]==svc_choice or s["en"]==svc_choice), None)
 
     today = date.today()
     picked_day = st.date_input(T[lang]["date"], value=today, min_value=today)
+
+    # Slots generation with better UX
     slots = gen_slots(picked_day, chosen["mins"] if chosen else 30)
     slot_labels = [t.strftime("%H:%M") for t in slots]
+    if not slot_labels:
+        st.info("لا توجد اوقات متاحة لهذا اليوم. اختر يومًا آخر." if lang=="ar" else "No times available for this date. Please choose another day.")
     slot_choice = st.selectbox(T[lang]["time"], options=["—"] + slot_labels, index=0)
 
     colx, coly = st.columns(2)
@@ -374,7 +407,8 @@ with tab_book:
         phone = st.text_input(T[lang]["phone"])
     notes = st.text_area(T[lang]["notes"])
 
-    if st.button(T[lang]["confirm"], type="primary"):
+    # Confirm booking
+    if st.button(T[lang]["confirm"], type="primary", use_container_width=True):
         if not chosen:
             st.error(T[lang]["errors"]["svc"]); st.stop()
         if not is_workday(picked_day):
@@ -398,19 +432,21 @@ with tab_book:
         if notes.strip():
             st.write(f"**{T[lang]['notes']}**: {notes}")
 
+        # ICS download
         title = f"{CLINIC_NAME} — {svc_choice}"
         desc  = f"Ref: {ref} | Phone: {phone}"
         ics = ics_bytes(title, chosen_time, chosen["mins"], ADDRESS_EN, desc)
         st.download_button(T[lang]["ics"], data=ics, file_name=f"{ref}.ics", mime="text/calendar")
 
+        # WhatsApp share confirmation
         confirm_text = (f"تم حجز موعدك في {CLINIC_NAME}.\n"
                         f"الخدمة: {svc_choice}\nالتاريخ: {picked_day} - الوقت: {slot_choice}\n"
                         f"المرجع: {ref}\nالعنوان: {ADDRESS_AR}\n{MAPS_URL}") if lang=="ar" else \
                        (f"Your appointment at {CLINIC_NAME} is booked.\n"
                         f"Service: {svc_choice}\nDate: {picked_day} - Time: {slot_choice}\n"
                         f"Ref: {ref}\nAddress: {ADDRESS_EN}\n{MAPS_URL}")
-        st.link_button("مشاركة التاكيد في واتساب" if lang=="ar" else "Share confirmation on WhatsApp",
-                       "https://wa.me/?text=" + quote(confirm_text))
+        link_button_safe("مشاركة التاكيد في واتساب" if lang=="ar" else "Share confirmation on WhatsApp",
+                         "https://wa.me/?text=" + quote(confirm_text))
 
 # -------------------------
 # TAB: Info
