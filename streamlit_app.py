@@ -3,9 +3,10 @@ import streamlit as st
 import random
 from urllib.parse import quote
 
-# 1) اعداد صفحة ستريمليت
-#st.set_page_config(page_title="Alef Centre - مساعد ذكي", page_icon="🧠", layout="wide")
+# 1) Page config
+st.set_page_config(page_title="Alef Centre - مساعد ذكي", page_icon="🧠", layout="wide")
 
+# 2) RTL + Arabic font + fix expander overlap
 st.markdown("""
 <style>
 /* RTL عام */
@@ -18,7 +19,7 @@ h1, h2, h3, h4, h5, p, ul, ol, li { text-align: right; }
 [data-testid="stExpander"] > details > summary {
   direction: rtl !important;
   display: flex;
-  flex-direction: row-reverse;   /* يخلي السهم يسار والعنوان يمين */
+  flex-direction: row-reverse;   /* يضع السهم يسار والعنوان يمين */
   align-items: center;
 }
 [data-testid="stExpander"] > details > summary svg {
@@ -28,13 +29,7 @@ h1, h2, h3, h4, h5, p, ul, ol, li { text-align: right; }
   flex: 1; text-align: right;
 }
 
-/* تسليك عناوين الحقول */
-[data-testid="stTextInput"] label,
-[data-testid="stTextArea"] label {
-  width: 100%; text-align: right;
-}
-
-/* شيء نبيه LTR (روابط/اكواد) */
+/* عناصر نريدها LTR عند الحاجة (روابط/اكواد) */
 .ltr, a code, code { direction: ltr !important; text-align: left !important; unicode-bidi: embed; }
 
 /* خط عربي مريح */
@@ -43,31 +38,7 @@ html, body, [data-testid="stAppViewContainer"] * { font-family: "Tajawal", sans-
 </style>
 """, unsafe_allow_html=True)
 
-
-# 2) تفعيل RTL + خط عربي
-st.markdown("""
-<style>
-/* اجعل الاتجاه يمين -> يسار */
-html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
-  direction: rtl;
-}
-/* محاذاة النصوص */
-[data-testid="stMarkdownContainer"], .stAlert, .stExpander, .stButton, .stText, .stSubheader, .stHeader {
-  text-align: right;
-}
-/* الحقول */
-input, textarea { direction: rtl !important; text-align: right !important; }
-/* العناوين والقوائم */
-h1, h2, h3, h4, h5, p, ul, ol, li { text-align: right; }
-/* عناصر نريدها LTR عند الحاجة (روابط/اكواد) */
-.ltr, a code, code { direction: ltr !important; text-align: left !important; unicode-bidi: embed; }
-/* خط عربي */
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap');
-html, body, [data-testid="stAppViewContainer"] * { font-family: "Tajawal", sans-serif; }
-</style>
-""", unsafe_allow_html=True)
-
-# 3) بيانات المساعد
+# 3) Data
 CLINIC_NAME = "Alef Centre"
 
 SERVICES = {
@@ -78,9 +49,10 @@ SERVICES = {
     "جلسة نطق وتخاطب": 300
 }
 
+# عناوين محدثة حسب خرائط جوجل
 ADDRESS_AR = "شارع الوصل، مبنى الفردوس 4، الطابق الاول، مكتب 133، دبي، الامارات العربية المتحدة"
 ADDRESS_EN = "Al wasl, Ferdous Building 4 1st Floor, Office 133 - Dubai - Émirats arabes unis."
-MAPS_URL   = "https://www.google.com/maps/place/Alef+Centre+مركز+ألف%E2%80%AD/@25.179052,55.2299736,17z/data=!4m10!1m2!2m1!1sAl+wasl,+Ferdous+Building+4+1st+Floor,+Office+133+-+Dubai+-+United+Arab+Emirates!3m6!1s0x3e5f69dc9f93a4db:0xc26cd5a7395f530!8m2!3d25.179052!4d55.2347372!15sClBBbCB3YXNsLCBGZXJkb3VzIEJ1aWxkaW5nIDQgMXN0IEZsb29yLCBPZmZpY2UgMTMzIC0gRHViYWkgLSBVbml0ZWQgQXJhYiBFbWlyYXRlc1pMIkphbCB3YXNsIGZlcmRvdXMgYnVpbGRpbmcgNCAxc3QgZmxvb3Igb2ZmaWNlIDEzMyBkdWJhaSB1bml0ZWQgYXJhYiBlbWlyYXRlc5IBFmVkdWNhdGlvbmFsX2NvbnN1bHRhbnSaASRDaGREU1VoTk1HOW5TMFZKUTBGblNVUjBjSFF6ZHkxM1JSQUKqAZUBEAEqICIcZmVyZG91cyBidWlsZGluZyA0IDFzdCBmbG9vcigAMh8QASIbxm50P0cykL6AQF309-FThyC40yRvnHtqelh9Mk4QAiJKYWwgd2FzbCBmZXJkb3VzIGJ1aWxkaW5nIDQgMXN0IGZsb29yIG9mZmljZSAxMzMgZHViYWkgdW5pdGVkIGFyYWIgZW1pcmF0ZXPgAQD6AQQIABA6!16s%2Fg%2F11fmsfdp21?hl=fr&entry=ttu&g_ep=EgoyMDI1MDkyMS4wIKXMDSoASAFQAw%3D%3D"
+MAPS_URL   = "https://maps.google.com/?q=Al+wasl,+Ferdous+Building+4+1st+Floor,+Office+133+-+Dubai+-+%C3%89mirats+arabes+unis."
 
 HOURS = {
     "الاحد - الخميس": "10:00 - 17:30",
@@ -91,7 +63,7 @@ HOURS = {
 PHONES = ["+971 4 388 1169", "+971 56 778 3020"]
 EMAILS = ["info@alefcentre.com", "alefcentre@gmail.com"]
 
-# 4) واجهة التطبيق
+# 4) UI
 st.title(f"🧠 {CLINIC_NAME} - مساعد ذكي (عرض تجريبي)")
 st.caption("واجهة عربية فقط. هذا ديمو للتجربة وليس نظاما نهائيا.")
 
@@ -130,7 +102,7 @@ def has_price_intent(text):
 def handle_message(msg: str) -> str:
     t = (msg or "").strip()
 
-    # الموقع اولا (لمنع التقاط "كم" داخل "موقعكم")
+    # الموقع اولا
     if has_any(t, ["موقع", "عنوان", "وين", "لوكيشن"]):
         return f"العنوان: {ADDRESS_AR}\n({ADDRESS_EN})\nرابط خرائط جوجل: {MAPS_URL}\nيمكنك استخدام الازرار في الاسفل لفتح الخريطة او ارسال اللوكيشن عبر واتساب."
 
@@ -159,26 +131,4 @@ def handle_message(msg: str) -> str:
         return "الاسعار التقريبية:\n" + "\n".join(lines)
 
     # ترحيب افتراضي
-    if has_any(t, ["مرحبا", "السلام", "اهلا"]):
-        return "اهلا بك. اسأل عن الحجز او الاسعار او ساعات العمل او الموقع او التواصل."
-    return "مفهوم. يمكنك ان تقول: حجز، الاسعار، ساعات العمل، الموقع، التواصل."
-
-user = st.text_input("اكتب رسالتك هنا")
-send = st.button("ارسال")
-if send or user:
-    if user:
-        st.write(f"**انت:** {user}")
-        st.success(handle_message(user))
-
-st.subheader("معلومات سريعة")
-st.write(f"ساعات العمل: الاحد - الخميس {HOURS['الاحد - الخميس']}")
-st.write(f"العنوان: {ADDRESS_AR}")
-st.write(f"الهاتف: {', '.join(PHONES)}")
-st.write(f"البريد: {', '.join(EMAILS)}")
-
-st.markdown("---")
-st.subheader("روابط سريعة")
-st.markdown(f"[فتح العنوان في خرائط جوجل]({MAPS_URL})")
-wa_text = f"لوكيشن Alef Centre:\\n{ADDRESS_AR}\\n{MAPS_URL}"
-wa_link = "https://wa.me/?text=" + quote(wa_text)
-st.markdown(f"[ارسال اللوكيشن عبر واتساب]({wa_link})")
+    if has_any(t, ["مرحبا", "ا]()_
