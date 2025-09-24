@@ -12,7 +12,7 @@ LOGO_URL = "https://alefcentre.com/favicon.ico"  # can replace with PNG/SVG late
 
 # Correct address + maps (as provided)
 ADDRESS_AR = "شارع الوصل، مبنى الفردوس 4، الطابق الاول، مكتب 133، دبي، الامارات العربية المتحدة"
-ADDRESS_EN = "Al wasl, Ferdous Building 4 1st Floor, Office 133 - Dubai - Émirats arabes unis."
+ADDRESS_EN = "Al wasl, Ferdous Building 4 1st Floor, Office 133 - Dubai - United Arab Emirates."
 MAPS_URL   = ("https://www.google.ae/maps/place/Alef+Centre+%D9%85%D8%B1%D9%83%D8%B2+%D8%A3%D9%84%D9%81%E2%80%AD/"
               "@25.1790568,55.2321623,16z/data=!3m1!4b1!4m6!3m5!1s0x3e5f69dc9f93a4db:0xc26cd5a7395f530!8m2!3d25.179052!"
               "4d55.2347372!16s%2Fg%2F11fmsfdp21?entry=ttu&g_ep=EgoyMDI1MDkyMS4wIKXMDSoASAFQAw%3D%3D")
