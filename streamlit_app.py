@@ -42,7 +42,7 @@ SERVICES = {
 
 ADDRESS_AR = "شارع الوصل، مبنى الفردوس 4، الطابق الاول، مكتب 133، دبي، الامارات العربية المتحدة"
 ADDRESS_EN = "Al wasl, Ferdous Building 4 1st Floor, Office 133 - Dubai - Émirats arabes unis."
-MAPS_URL   = "https://maps.google.com/?q=Al+wasl,+Ferdous+Building+4+1st+Floor,+Office+133+-+Dubai+-+%C3%89mirats+arabes+unis."
+MAPS_URL   = "https://www.google.com/maps/place/Alef+Centre+مركز+ألف%E2%80%AD/@25.179052,55.2299736,17z/data=!4m10!1m2!2m1!1sAl+wasl,+Ferdous+Building+4+1st+Floor,+Office+133+-+Dubai+-+United+Arab+Emirates!3m6!1s0x3e5f69dc9f93a4db:0xc26cd5a7395f530!8m2!3d25.179052!4d55.2347372!15sClBBbCB3YXNsLCBGZXJkb3VzIEJ1aWxkaW5nIDQgMXN0IEZsb29yLCBPZmZpY2UgMTMzIC0gRHViYWkgLSBVbml0ZWQgQXJhYiBFbWlyYXRlc1pMIkphbCB3YXNsIGZlcmRvdXMgYnVpbGRpbmcgNCAxc3QgZmxvb3Igb2ZmaWNlIDEzMyBkdWJhaSB1bml0ZWQgYXJhYiBlbWlyYXRlc5IBFmVkdWNhdGlvbmFsX2NvbnN1bHRhbnSaASRDaGREU1VoTk1HOW5TMFZKUTBGblNVUjBjSFF6ZHkxM1JSQUKqAZUBEAEqICIcZmVyZG91cyBidWlsZGluZyA0IDFzdCBmbG9vcigAMh8QASIbxm50P0cykL6AQF309-FThyC40yRvnHtqelh9Mk4QAiJKYWwgd2FzbCBmZXJkb3VzIGJ1aWxkaW5nIDQgMXN0IGZsb29yIG9mZmljZSAxMzMgZHViYWkgdW5pdGVkIGFyYWIgZW1pcmF0ZXPgAQD6AQQIABA6!16s%2Fg%2F11fmsfdp21?hl=fr&entry=ttu&g_ep=EgoyMDI1MDkyMS4wIKXMDSoASAFQAw%3D%3D"
 
 HOURS = {
     "الاحد - الخميس": "10:00 - 17:30",
