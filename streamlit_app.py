@@ -4,7 +4,7 @@ import random
 from urllib.parse import quote
 
 # 1) اعداد صفحة ستريمليت
-st.set_page_config(page_title="Alef Centre - مساعد ذكي", page_icon="🧠", layout="wide")
+#st.set_page_config(page_title="Alef Centre - مساعد ذكي", page_icon="🧠", layout="wide")
 
 # 2) تفعيل RTL + خط عربي
 st.markdown("""
@@ -40,9 +40,9 @@ SERVICES = {
     "جلسة نطق وتخاطب": 300
 }
 
-ADDRESS_AR = "مبنى الفردوس 4، شارع الوصل، الطابق الاول، مكتب 133، الصفاء 1، جميرا، دبي"
-ADDRESS_EN = "Al Ferdous 4, Al Wasl Road, First Floor, Office 133, Al Safa 1, Jumeirah, Dubai, UAE"
-MAPS_URL   = "https://maps.google.com/?q=Al+Ferdous+4,+Al+Wasl+Road,+Office+133,+Dubai"
+ADDRESS_AR = "شارع الوصل، مبنى الفردوس 4، الطابق الاول، مكتب 133، دبي، الامارات العربية المتحدة"
+ADDRESS_EN = "Al wasl, Ferdous Building 4 1st Floor, Office 133 - Dubai - Émirats arabes unis."
+MAPS_URL   = "https://maps.google.com/?q=Al+wasl,+Ferdous+Building+4+1st+Floor,+Office+133+-+Dubai+-+%C3%89mirats+arabes+unis."
 
 HOURS = {
     "الاحد - الخميس": "10:00 - 17:30",
