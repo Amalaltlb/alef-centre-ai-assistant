@@ -1,188 +1,68 @@
 # -*- coding: utf-8 -*-
 import streamlit as st
-import random
-from urllib.parse import quote
+from urllib.parse import quote, quote_plus
+from datetime import datetime, date, time, timedelta
+import uuid
+import re
+import io
 
-# -------------------------
-# 1) Page config
-# -------------------------
-st.set_page_config(page_title="Alef Centre - مساعد ذكي", page_icon="🧠")
+# =========================
+# Page & Theme
+# =========================
+st.set_page_config(page_title="Alef Centre — AI Assistant", page_icon="🧠", layout="wide")
 
-# -------------------------
-# 2) RTL + Arabic font + fix expander overlap
-# -------------------------
 st.markdown("""
 <style>
-/* RTL عام */
+/* RTL layout */
 html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] { direction: rtl; }
 [data-testid="stMarkdownContainer"], .stAlert, .stExpander, .stButton, .stText, .stSubheader, .stHeader { text-align: right; }
-input, textarea { direction: rtl !important; text-align: right !important; }
-h1, h2, h3, h4, h5, p, ul, ol, li { text-align: right; }
+input, textarea, select { direction: rtl !important; text-align: right !important; }
+h1, h2, h3, h4, h5, p, ul, ol, li { text-align: right; margin: 0.25rem 0; }
 
-/* ✅ اصلاح تراكب عنوان الـ Expander مع الأيقونة */
+/* Expander overlap fix */
 [data-testid="stExpander"] > details > summary {
-  direction: rtl !important;
-  display: flex;
-  flex-direction: row-reverse;   /* يضع السهم يسار والعنوان يمين */
-  align-items: center;
+  direction: rtl !important; display: flex; flex-direction: row-reverse; align-items: center;
 }
-[data-testid="stExpander"] > details > summary svg {
-  margin-left: 8px; margin-right: 0;
-}
-[data-testid="stExpander"] > details > summary > div {
-  flex: 1; text-align: right;
+[data-testid="stExpander"] > details > summary svg { margin-left: 8px; }
+[data-testid="stExpander"] > details > summary > div { flex: 1; text-align: right; }
+
+/* Chips */
+.chips { display:flex; flex-wrap:wrap; gap:8px; margin: 6px 0 2px; }
+.chips a {
+  display:inline-block; padding:8px 10px; border-radius:999px; background:#f1f5f9; color:#0f172a;
+  text-decoration:none; font: 600 12px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  border:1px solid #e2e8f0;
 }
 
-/* عناصر نريدها LTR عند الحاجة (روابط/اكواد) */
+/* LTR blocks for links/code */
 .ltr, a code, code { direction: ltr !important; text-align: left !important; unicode-bidi: embed; }
 
-/* خط عربي مريح */
+/* Arabic font */
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap');
 html, body, [data-testid="stAppViewContainer"] * { font-family: "Tajawal", sans-serif; }
 </style>
 """, unsafe_allow_html=True)
 
-# -------------------------
-# 3) Data
-# -------------------------
+# =========================
+# Data
+# =========================
+# Business data
 CLINIC_NAME = "Alef Centre"
 
-SERVICES = {
-    "جلسة فحص ارلن اولية": 350,
-    "تشخيص ارلن كامل": 900,
-    "متابعة وتعديل العدسات": 250,
-    "دعم تعليمي وصعوبات تعلم": 300,
-    "جلسة نطق وتخاطب": 300
-}
-
-# عناوين محدثة حسب خرائط جوجل (كما زودتني)
 ADDRESS_AR = "شارع الوصل، مبنى الفردوس 4، الطابق الاول، مكتب 133، دبي، الامارات العربية المتحدة"
-ADDRESS_EN = "Al wasl, Ferdous Building 4 1st Floor, Office 133 - Dubai - United Arab Emarites."
-MAPS_URL   = "https://www.google.ae/maps/place/Alef+Centre+مركز+ألف%E2%80%AD/@25.1790568,55.2321623,16z/data=!3m1!4b1!4m6!3m5!1s0x3e5f69dc9f93a4db:0xc26cd5a7395f530!8m2!3d25.179052!4d55.2347372!16s%2Fg%2F11fmsfdp21?entry=ttu&g_ep=EgoyMDI1MDkyMS4wIKXMDSoASAFQAw%3D%3D"
-
-HOURS = {
-    "الاحد - الخميس": "10:00 - 17:30",
-    "الجمعة": "مغلق",
-    "السبت": "مغلق"
-}
+ADDRESS_EN = "Al wasl, Ferdous Building 4 1st Floor, Office 133 - Dubai - Émirats arabes unis."
+MAPS_QUERY = ADDRESS_EN
+MAPS_URL   = "https://maps.google.com/?q=" + quote_plus(MAPS_QUERY)
 
 PHONES = ["+971 4 388 1169", "+971 56 778 3020"]
 EMAILS = ["info@alefcentre.com", "alefcentre@gmail.com"]
 
-# -------------------------
-# 4) UI
-# -------------------------
-st.title(f"🧠 {CLINIC_NAME} - مساعد ذكي (عرض تجريبي)")
-st.caption("واجهة عربية فقط. هذا ديمو للتجربة وليس نظاما نهائيا.")
+# Opening hours
+WORK_DAYS = [0,1,2,3,6]  # Monday=0 ... Sunday=6  (Sun–Thu open; Fri/Sat closed)
+OPEN_T, CLOSE_T = time(10, 0), time(17, 30)
 
-st.markdown("""
-**ماذا يفعل المساعد؟**
-- حجز جلسة مبدئية او متابعة
-- الاجابة عن الاسعار التقريبية
-- عرض ساعات العمل والعنوان وطرق التواصل
-- ارسال تاكيد وهمي للحجز في هذا الديمو
-""")
-
-with st.expander("طريقة الاستخدام / امثلة", expanded=False):
-    st.write("""
-اكتب رسائل مثل:
-- اريد حجز جلسة فحص ارلن يوم الخميس الساعة 4
-- ما هي ساعات العمل
-- كم سعر التشخيص الكامل
-- اين موقعكم
-- اريد رقم التواصل
-""")
-
-# -------------------------
-# 5) Helpers
-# -------------------------
-def has_any(text, keywords):
-    return any(k in text for k in keywords)
-
-def has_price_intent(text):
-    t = (text or "").strip()
-    if "سعر" in t or "الاسعار" in t:
-        return True
-    words = t.replace("؟", " ").replace("?", " ").split()
-    if "كم" in words:
-        return True
-    if "كم سعر" in t or "بكم" in t:
-        return True
-    return False
-
-# -------------------------
-# 6) Core handler
-# -------------------------
-def handle_message(msg: str) -> str:
-    t = (msg or "").strip()
-
-    # الموقع اولا (لتجنب التقاط "كم" داخل "موقعكم")
-    if has_any(t, ["موقع", "عنوان", "وين", "لوكيشن"]):
-        return (
-            f"العنوان: {ADDRESS_AR}\n"
-            f"({ADDRESS_EN})\n"
-            f"رابط خرائط جوجل: {MAPS_URL}\n"
-            f"يمكنك استخدام الازرار في الاسفل لفتح الخريطة او ارسال اللوكيشن عبر واتساب."
-        )
-
-    # الحجز
-    if has_any(t, ["حجز", "موعد", "ارلن"]):
-        slot = f"{random.choice(['10:00','12:30','15:00','16:30'])} يوم {random.choice(['الاربعاء','الخميس','الاحد'])}"
-        ref  = f"REF-{random.randint(1000,9999)}"
-        svc  = random.choice(list(SERVICES.keys()))
-        return f"تم الحجز بنجاح. الخدمة: {svc}. الموعد: {slot}. رقم المرجع: {ref}. هذا حجز تجريبي."
-
-    # ساعات العمل
-    if has_any(t, ["ساعات", "العمل", "دوام"]):
-        return (
-            f"ساعات العمل:\n"
-            f"الاحد - الخميس: {HOURS['الاحد - الخميس']}\n"
-            f"الجمعة: {HOURS['الجمعة']}\n"
-            f"السبت: {HOURS['السبت']}"
-        )
-
-    # التواصل
-    if has_any(t, ["تواصل", "رقم", "واتساب", "بريد"]):
-        return f"ارقام الهاتف: {', '.join(PHONES)}\nالبريد الالكتروني: {', '.join(EMAILS)}"
-
-    # التامين
-    if has_any(t, ["تامين", "تأمين"]):
-        return "المركز تعليمي وتشخيصي لاضطراب ارلن ودعم التعلم، وليس عيادة طبية تقليدية. عادة لا يتم الفوترة عبر التامين الطبي. للاستفسار النهائي تواصل مع الاستقبال."
-
-    # الاسعار (بعد كل ما سبق)
-    if has_price_intent(t):
-        lines = [f"- {k}: {v} درهم تقريبا" for k, v in SERVICES.items()]
-        return "الاسعار التقريبية:\n" + "\n".join(lines)
-
-    # ترحيب افتراضي
-    if has_any(t, ["مرحبا", "السلام", "اهلا"]):
-        return "اهلا بك. اسأل عن الحجز او الاسعار او ساعات العمل او الموقع او التواصل."
-
-    # fallback
-    return "مفهوم. يمكنك ان تقول: حجز، الاسعار، ساعات العمل، الموقع، التواصل."
-
-# -------------------------
-# 7) Chat box
-# -------------------------
-user = st.text_input("اكتب رسالتك هنا")
-send = st.button("ارسال")
-if send or user:
-    if user:
-        st.write(f"**انت:** {user}")
-        st.success(handle_message(user))
-
-# -------------------------
-# 8) Quick info
-# -------------------------
-st.subheader("معلومات سريعة")
-st.write(f"ساعات العمل: الاحد - الخميس {HOURS['الاحد - الخميس']}")
-st.write(f"العنوان: {ADDRESS_AR}")
-st.write(f"الهاتف: {', '.join(PHONES)}")
-st.write(f"البريد: {', '.join(EMAILS)}")
-
-st.markdown("---")
-st.subheader("روابط سريعة")
-st.markdown(f"[فتح العنوان في خرائط جوجل]({MAPS_URL})")
-wa_text = f"لوكيشن Alef Centre:\\n{ADDRESS_AR}\\n{MAPS_URL}"
-wa_link = "https://wa.me/?text=" + quote(wa_text)
-st.markdown(f"[ارسال اللوكيشن عبر واتساب]({wa_link})")
+SERVICES = [
+    {"id":"irlen_screen",  "ar":"جلسة فحص ارلن اولية",       "en":"Irlen initial screening", "mins":30, "price":350},
+    {"id":"irlen_full",    "ar":"تشخيص ارلن كامل",           "en":"Irlen full assessment",   "mins":60, "price":900},
+    {"id":"lenses_follow", "ar":"متابعة وتعديل العدسات",     "en":"Lenses follow-up",        "mins":20, "price":250},
+    {"id":"learning_sup",  "ar":"دعم تعليمي وصعوبات تعلم"_
