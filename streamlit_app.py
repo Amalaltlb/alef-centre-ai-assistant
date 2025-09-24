@@ -7,14 +7,14 @@ import uuid, re, io
 # =========================
 # Branding (set your real logo URL here)
 # =========================
-LOGO_URL = "https://share.google/images/T1R4KqhrYMF30ZG6J"  # ✅ replace with real logo URL if you have it
+LOGO_URL = " "  # ✅ replace with real logo URL if you have it
 
 # =========================
 # Page config
 # =========================
 st.set_page_config(
     page_title="Alef Centre — AI Assistant",
-    page_icon=(LOGO_URL if LOGO_URL else ""),
+    page_icon=(LOGO_URL if LOGO_URL else " "),
     layout="wide",
 )
 
