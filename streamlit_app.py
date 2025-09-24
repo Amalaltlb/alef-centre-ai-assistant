@@ -16,7 +16,7 @@ SERVICES = {
 
 ADDRESS_AR = "مبنى الفردوس 4، شارع الوصل، الطابق الاول، مكتب 133، الصفاء 1، جميرا، دبي"
 ADDRESS_EN = "Al Ferdous 4, Al Wasl Road, First Floor, Office 133, Al Safa 1, Jumeirah, Dubai, UAE"
-MAPS_URL = "https://maps.google.com/?q=Al+Ferdous+4,+Al+Wasl+Road,+Office+133,+Dubai"
+MAPS_URL = "https://www.google.ae/maps/dir//Sunset+Mall+-+Jumeirah+Beach+Rd,+Jumeira+3+-+Dubai/@25.1835861,55.226114,19z/data=!4m8!4m7!1m0!1m5!1m1!1s0x3e5f41fff73710a5:0x36a76cf053806379!2m2!1d55.2261223!2d25.1835381?entry=ttu&g_ep=EgoyMDI1MDkyMS4wIKXMDSoASAFQAw%3D%3D"
 
 HOURS = {
     "الاحد - الخميس": "10:00 - 17:30",
